@@ -1,10 +1,10 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
 /**
- * KLADR
+ * KLADR_Core_Kladr
  *
  * @author avis <smgladkovskiy@gmial.com>
- * @copyrignt
+ * @copyright (c) 2010 EnerDesign <http://enerdesign.ru>
  */
 class KLADR_Core_Kladr {
 
@@ -56,9 +56,8 @@ class KLADR_Core_Kladr {
 	public function set_address_data($item_name, $code)
 	{
 		$address_item = '_' . $item_name;
-		if(property_exists(KLADR_Address, $address_item))
+		if(property_exists($this->_address, $address_item))
 		{
-			$this->_address->$address_item = new KLADR_Address_Item();
 			$this->_address->$address_item->code($code);
 			return TRUE;
 		}
@@ -197,4 +196,4 @@ class KLADR_Core_Kladr {
 
 		return $address;
 	}
-} // End Cladr
+} // End KLADR_Core_Kladr

@@ -4,7 +4,7 @@
  * KLADR_Core_Address_Item
  *
  * @author avis <smgladkovskiy@gmial.com>
- * @copyrignt
+ * @copyright (c) 2010 EnerDesign <http://enerdesign.ru>
  */
 abstract class KLADR_Core_Address_Item {
 
@@ -14,6 +14,12 @@ abstract class KLADR_Core_Address_Item {
 	protected $_config;
 	protected $_db;
 
+	/**
+	 * KLADR_Address_Item contsructor
+	 *
+	 * @param string $db
+	 * @return void
+	 */
 	public function __construct($db = 'default')
 	{
 		$this->_config = Kohana::config('kladr');
@@ -23,6 +29,12 @@ abstract class KLADR_Core_Address_Item {
 		}
 	}
 
+	/**
+	 * KLADR_Address_Item name getter/setter
+	 *
+	 * @param null|string $code
+	 * @return string|bool
+	 */
 	public function code(string $code = NULL)
 	{
 		if($code === NULL)
@@ -34,6 +46,11 @@ abstract class KLADR_Core_Address_Item {
 		return TRUE;
 	}
 
+	/**
+	 * Gets KLADR_Address_Item name
+	 *
+	 * @return string|NULL
+	 */
 	public function name()
 	{
 		if($this->code AND ! $this->name)
@@ -42,6 +59,7 @@ abstract class KLADR_Core_Address_Item {
 				->from($this->_config['db_tables']['sorcbase'])
 				->where('KOD_T_ST', '=', $this->code)
 				->limit(1)
+				->as_object()
 				->execute($this->_db);
 
 			$this->name = $query->SOCRNAME;
@@ -54,4 +72,4 @@ abstract class KLADR_Core_Address_Item {
 
 		return NULL;
 	}
-} // END KLADR_Core_Address_Item
+} // End KLADR_Core_Address_Item
