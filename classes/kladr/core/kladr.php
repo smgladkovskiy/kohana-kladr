@@ -3,6 +3,22 @@
 /**
  * KLADR_Core_Kladr
  *
+ * @example:
+ * 	$kladr = kladr::instance();
+ * 	$kladr->address_item_type('subject', 'обл');
+ * 	$kladr->get_collections('subjects');
+ * 	$kladr->address_item_name('subjects', 'Башкортостан');
+ * 	$kladr->get_collections('district');
+ * 	$kladr->address_item_name('district', 'Колумбия');
+ * 	$kladr->get_collections('city');
+ * 	$kladr->address_item_name('city', 'Вашингтон');
+ * 	$kladr->get_collections('locality');
+ * 	$kladr->address_item_name('locality', 'Васюки');
+ * 	$kladr->get_collections('street');
+ * 	$kladr->address_item_name('street', 'Поляны');
+ * 	$kladr->get_collections('houses');
+ * 	$kladr->get_address();
+ *
  * @author avis <smgladkovskiy@gmial.com>
  * @copyright (c) 2010 EnerDesign <http://enerdesign.ru>
  */
@@ -20,7 +36,7 @@ class KLADR_Core_Kladr {
 	 * @param string $db
 	 * @return KLADR
 	 */
-	public function instance($db = 'default')
+	public static function instance($db = 'default')
 	{
 		if( ! is_object(self::$instance))
 		{
@@ -43,7 +59,7 @@ class KLADR_Core_Kladr {
 			$this->_db = $db;
 		}
 
-		$this->_address = new KLADR_Address();
+		$this->_address = new KLADR_Address($db);
 	}
 
 	/**
@@ -58,7 +74,7 @@ class KLADR_Core_Kladr {
 		$address_item = '_' . $item_name;
 		if(property_exists($this->_address, $address_item))
 		{
-			$this->_address->$address_item->code($code);
+			$this->_address->$address_item->code_socr($code);
 			return TRUE;
 		}
 
@@ -133,6 +149,16 @@ class KLADR_Core_Kladr {
 		$this->_set_address_by_code($code);
 	}
 
+	public function get_collections($address_item)
+	{
+		if(property_exists($this->_address, $address_item))
+		{
+			return $this->_address->$address_item->collection($this->_address->code);
+		}
+
+		return FALSE;
+	}
+
 	/**
 	 * Address object filling
 	 *
@@ -170,6 +196,8 @@ class KLADR_Core_Kladr {
 		$district = $_address->_district->code();
 		$city = $_address->_city->code();
 		$locality = $_address->_locality->code();
+
+		$street = $_address->_street->code();
 
 		$query = DB::select(
 				's.NAME AS subject_name',
