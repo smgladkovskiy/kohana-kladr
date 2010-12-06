@@ -133,9 +133,9 @@ abstract class KLADR_Core_Address_Item {
 	public function collections($parent_code = NULL)
 	{
 		$code = str_repeat('0', 13);
-		if($parent_code === NULL)
+		if($parent_code === NULL OR $parent_code == '00' OR  $parent_code == '000')
 		{
-			$code = sprintf("%-013s", str_repeat('%', $this->_begin + 1 + $this->_length));
+			$code = sprintf("%-013s", str_repeat('%', $this->_begin + $this->_length));
 		}
 		else
 		{
