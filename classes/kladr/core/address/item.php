@@ -36,7 +36,7 @@ abstract class KLADR_Core_Address_Item {
 			$this->_db = $db;
 		}
 		$this->_length = 3;
-
+		$this->code = '00';
 		switch($level)
 		{
 			case 1:
@@ -74,10 +74,30 @@ abstract class KLADR_Core_Address_Item {
 	}
 
 	/**
+	 * KLADR_Address_Item code length
+	 *
+	 * @return int
+	 */
+	public function code_length()
+	{
+		return $this->_length;
+	}
+
+	/**
+	 * KLADR_Address_Item code begin
+	 *
+	 * @return int
+	 */
+	public function code_begin()
+	{
+		return $this->_begin;
+	}
+
+	/**
 	 * Gets KLADR_Address_Item type
 	 *
-	 * @return string|
-	 * NULL
+	 * @todo rebuild this shit
+	 * @return string| NULL
 	 */
 	public function type()
 	{
@@ -105,22 +125,12 @@ abstract class KLADR_Core_Address_Item {
 	}
 
 	/**
-	 * Gets collection of items from next address_item level
+	 * Gets KLADR_Address_Item collection based on code parentness
 	 *
-	 * @todo level searching (?)
-	 * @param string $name
+	 * @param string $parent_code
 	 * @return array
 	 */
-	public function collection()
-	{
-		$query = DB::select('*')
-			->from($this->_config['db_tables']['sorcbase'])
-			->where('LEVEL', '=', $this->level)
-			->execute();
-		return $query->as_array('KOD_T_ST', 'SOCRNAME');
-	}
-
-	public function names_collection($parent_code = NULL)
+	public function collections($parent_code = NULL)
 	{
 		$code = str_repeat('0', 13);
 		if($parent_code === NULL)
@@ -152,10 +162,5 @@ abstract class KLADR_Core_Address_Item {
 			->execute();
 
 		return $query->as_array('CODE', 'NAME');
-	}
-
-	public function code_length()
-	{
-		return $this->_length;
 	}
 } // End KLADR_Core_Address_Item

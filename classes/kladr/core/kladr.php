@@ -26,9 +26,9 @@ class KLADR_Core_Kladr {
 
 	public static $instance;
 
-	private $_address;
-	private $_config;
-	private $_db;
+	protected $_address;
+	protected $_config;
+	protected $_db;
 
 	/**
 	 * KLADR class instance
@@ -89,7 +89,7 @@ class KLADR_Core_Kladr {
 	 */
 	public function subject()
 	{
-		return $this->_address->_subject;
+		return $this->_address->subject;
 	}
 
 	/**
@@ -99,7 +99,7 @@ class KLADR_Core_Kladr {
 	 */
 	public function district()
 	{
-		return $this->_address->_district;
+		return $this->_address->district;
 	}
 
 	/**
@@ -109,7 +109,7 @@ class KLADR_Core_Kladr {
 	 */
 	public function city()
 	{
-		return $this->_address->_city;
+		return $this->_address->city;
 	}
 
 	/**
@@ -118,7 +118,37 @@ class KLADR_Core_Kladr {
 	 */
 	public function locality()
 	{
-		return $this->_address->_locality;
+		return $this->_address->locality;
+	}
+
+	/**
+	 * Gets subjects collection
+	 *
+	 * @return array
+	 */
+	public function subjects()
+	{
+		return $this->_address->subject->collections();
+	}
+
+	/**
+	 * Gets districts collection of the subject
+	 *
+	 * @return array
+	 */
+	public function districts()
+	{
+		return $this->_address->district->collections($this->_address->subject->code);
+	}
+
+	/**
+	 * Gets cities collection of the districts
+	 *
+	 * @return array
+	 */
+	public function cities()
+	{
+		return $this->_address->city->collections($this->_address->subject->code.$this->_address->district->code);
 	}
 
 	/**
@@ -150,6 +180,12 @@ class KLADR_Core_Kladr {
 		$this->_set_address_by_code($code);
 	}
 
+	/**
+	 * @todo придумать, зачем это нужно было мне в 3 часа ночи...
+	 * @throws Kohana_Exception
+	 * @param  $address_item
+	 * @return
+	 */
 	public function get_type_collections($address_item)
 	{
 		if(property_exists($this->_address, $address_item))
@@ -158,29 +194,6 @@ class KLADR_Core_Kladr {
 		}
 
 		throw new Kohana_Exception('there is no such Address property: '. $address_item);
-	}
-
-//	public function get_name_collections($address_item)
-//	{
-//		if(property_exists($this->_address, $address_item))
-//		{
-//			return $this->_address->$address_item->names_collection($this);
-//		}
-//
-//		throw new Kohana_Exception('there is no such Address property: '. $address_item);
-//	}
-
-	public function subjects()
-	{
-		return $this->_address->subject->names_collection();
-	}
-	public function districts()
-	{
-		return $this->_address->district->names_collection($this->_address->subject->code);
-	}
-	public function cities()
-	{
-		return $this->_address->city->names_collection($this->_address->subject->code.$this->_address->district->code);
 	}
 
 	/**
@@ -199,7 +212,7 @@ class KLADR_Core_Kladr {
 	 * @param string|int $code
 	 * @return void
 	 */
-	private function _set_address_by_code($code)
+	protected function _set_address_by_code($code)
 	{
 		$this->set_address_data('subject', (substr($code, 0, 2)));
 		$this->set_address_data('district', (substr($code, 2, 3)));
@@ -210,41 +223,76 @@ class KLADR_Core_Kladr {
 	/**
 	 * Gets address string from DB
 	 *
+	 * @todo implement streets
 	 * @param KLADR_Address $_address
-	 * @return KLADR_Address|string
+	 * @return string
 	 */
-	private function _get_address(KLADR_Address $_address)
+	protected function _get_address(KLADR_Address $_address)
 	{
 
-		$subject = $_address->subject->code();
-		$district = $_address->district->code();
-		$city = $_address->city->code();
-		$locality = $_address->locality->code();
+		$code = str_repeat('0', 13);
+		$code = substr_replace($code, '%%', 11, 2);
 
-		$street = $_address->street->code();
+		$subject = substr_replace(
+			$code,
+			$_address->subject->code(),
+			$_address->subject->code_begin(),
+			$_address->subject->code_length()
+		);
+
+		$district = substr_replace(
+			$subject,
+			$_address->district->code(),
+			$_address->district->code_begin(),
+			$_address->district->code_length()
+		);
+
+		$city = substr_replace(
+			$district,
+			$_address->city->code(),
+			$_address->city->code_begin(),
+			$_address->city->code_length()
+		);
+
+		$locality = substr_replace(
+			$city,
+			$_address->locality->code(),
+			$_address->locality->code_begin(),
+			$_address->locality->code_length()
+		);
+
+//		$street = $_address->street->code();
 
 		$query = DB::select(
-				's.NAME AS subject_name',
-				's.SOCR AS subject_type',
-				'd.NAME AS district_name',
-				'd.SOCR AS district_type',
-				'c.NAME AS city_name',
-				'c.SOCR AS city_type',
-				'l.NAME AS locality_name',
-				'l.SOCR AS locality_type')
-			->from(array($this->_config['db_tables']['kladr'], 'l'))
-			->join(array($this->_config['db_tables']['kladr'], 'c'), 'LEFT')
-				->on('c.CODE', '=',  sprintf('%-013d', $subject.$district.$city))
-			->join(array($this->_config['db_tables']['kladr'], 'd'), 'LEFT')
-				->on('d.CODE', '=', sprintf('%-013d', $subject.$district))
-			->join(array($this->_config['db_tables']['kladr'], 's'), 'LEFT')
-				->on('s.CODE', '=', sprintf('%-013d', $subject))
-			->where('l.CODE', '=', sprintf('%-013d', $subject.$district.$city.$locality))
+				array('s.NAME', 'subject_name'),
+				array('s.SOCR', 'subject_type'),
+				array('d.NAME', 'district_name'),
+				array('d.SOCR', 'district_type'),
+				array('c.NAME', 'city_name'),
+				array('c.SOCR', 'city_type'),
+				array('l.NAME', 'locality_name'),
+				array('l.SOCR', 'locality_type'))
+			->from(
+				array($this->_config['db_tables']['kladr'], 's'),
+				array($this->_config['db_tables']['kladr'], 'd'),
+				array($this->_config['db_tables']['kladr'], 'c'),
+				array($this->_config['db_tables']['kladr'], 'l')
+			)
+			->where('s.CODE', 'LIKE', $subject)
+			->where('d.CODE', 'LIKE', $district)
+			->where('c.CODE', 'LIKE',  $city)
+			->where('l.CODE', 'LIKE', $locality)
+			->limit(1)
+			->as_object()
 			->execute();
-		$address = $query->subject_name . ' ' . $query->subject_type . ', '
-		         . $query->district_name . ' ' . $query->district_type . ', '
-		         . $query->city_type . ' ' . $query->city_name . ', '
-		         . $query->locality_type . ' ' . $query->locality_name;
+		$result = $query[0];
+
+		$address = $result->subject_name  . ' '  . $result->subject_type  . ', '
+		         . $result->district_name . ' '  . $result->district_type . ', '
+		         . $result->city_type     . '. ' . $result->city_name;
+
+		if($result->locality_name != $result->city_name)
+			$address .= ', ' . $result->locality_type . '. ' . $result->locality_name;
 
 		return $address;
 	}
