@@ -24,6 +24,11 @@ abstract class KLADR_Core_Address {
 		}
 	}
 
+	/**
+	 * Address code updating. Looking through all KLADR_Address_Items
+	 *
+	 * @return string
+	 */
 	public function update_code()
 	{
 		$this->code = NULL;
