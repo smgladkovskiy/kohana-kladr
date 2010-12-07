@@ -175,7 +175,7 @@ class KLADR_Core_Kladr {
 	 * @param string $code
 	 * @return void
 	 */
-	public function set_address_by_code(string $code)
+	public function set_address_by_code($code)
 	{
 		$this->_set_address_by_code($code);
 	}
