@@ -145,9 +145,33 @@ class KLADR_Core_Kladr {
 	 * @param string $code
 	 * @return void
 	 */
-	public function set_address(string $code)
+	public function set_address_by_code(string $code)
 	{
 		$this->_set_address_by_code($code);
+	}
+
+	/**
+	 * Address setting
+	 *
+	 * @param string $code
+	 * @return void
+	 */
+	public function subject_name($name)
+	{
+		$name = explode(' ', $name);
+		array_pop($name);
+		$name = implode(' ', $name);
+		$query = DB::select(
+			$this->_config['db_tables']['kladr'].'.CODE')
+		->from($this->_config['db_tables']['kladr'])
+		->where('NAME', '=', $name)
+		->limit(1)
+		->as_object()
+		->execute();
+
+		$result = $query[0];
+
+		$this->_address->subject->code($result->CODE);
 	}
 
 	public function get_type_collections($address_item)
