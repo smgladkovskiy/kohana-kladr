@@ -82,6 +82,12 @@ class KLADR_Core_Kladr {
 		return FALSE;
 	}
 
+	public function actual($status = FALSE)
+	{
+		$this->_address->_actual = (bool) $status;
+	    return $this;
+	}
+
 	/**
 	 * Subject getter
 	 *
@@ -128,7 +134,7 @@ class KLADR_Core_Kladr {
 	 */
 	public function subjects()
 	{
-		return $this->_address->subject->collections();
+		return $this->_address->subject->collections(NULL, TRUE);
 	}
 
 	/**
@@ -195,6 +201,7 @@ class KLADR_Core_Kladr {
 			$this->_config['db_tables']['kladr'].'.CODE')
 		->from($this->_config['db_tables']['kladr'])
 		->where('NAME', '=', $name)
+		->where('CODE', 'LIKE', '%%00000000000')
 		->limit(1)
 		->as_object()
 		->execute();
@@ -255,7 +262,8 @@ class KLADR_Core_Kladr {
 	{
 
 		$code = str_repeat('0', 13);
-		$code = substr_replace($code, '%%', 11, 2);
+		if($this->_address->actual === FALSE)
+			$code = substr_replace($code, '%%', 11, 2);
 
 		$subject = substr_replace(
 			$code,

@@ -14,6 +14,7 @@ abstract class KLADR_Core_Address {
 	public $locality;
 	public $street;
 	public $code;
+	public $actual = FALSE;
 
 	public function __construct($db = 'default')
 	{

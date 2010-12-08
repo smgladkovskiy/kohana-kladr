@@ -130,7 +130,7 @@ abstract class KLADR_Core_Address_Item {
 	 * @param string $parent_code
 	 * @return array
 	 */
-	public function collections($parent_code = NULL)
+	public function collections($parent_code = NULL, $actual = FALSE)
 	{
 		$code = str_repeat('0', 13);
 		if($parent_code === NULL OR $parent_code == '00' OR  $parent_code == '000')
@@ -149,16 +149,19 @@ abstract class KLADR_Core_Address_Item {
 		}
 
 		// status mask set
-		$code = substr_replace($code, '%%', 11, 2);
+		if($actual === FALSE) $code = substr_replace($code, '%%', 11, 2);
 
 		$query = DB::select(DB::expr('CONCAT(`NAME`, " ", `SOCR`) AS NAME'), 'CODE')
 			->from($this->_config['db_tables']['kladr'])
-			->where('CODE', 'LIKE', $code)
-			->and_where_open()
+			->where('CODE', 'LIKE', $code);
+	    if($actual === FALSE)
+	    {
+		    $query = $query->and_where_open()
 				->where(DB::expr('right(CODE,2)'), '=', '51')
 				->or_where(DB::expr('right(CODE,2)'), '=', '00')
-			->and_where_close()
-			->order_by('NAME', 'ASC')
+			->and_where_close();
+	    }
+			$query =$query->order_by('NAME', 'ASC')
 			->execute();
 
 		return $query->as_array('CODE', 'NAME');
