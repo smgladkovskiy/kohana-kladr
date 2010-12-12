@@ -21,8 +21,16 @@ abstract class KLADR_Core_Address {
 		$i = 1;
 		foreach(get_class_vars(__CLASS__) as $address_item => $value)
 		{
-			$this->$address_item = new KLADR_Address_Item($i++, $db);
+			if($i<=4)
+			{
+				$this->$address_item = new KLADR_Address_Item($i++, $db);
+			}
+		    else
+		    {
+			    break;
+		    }
 		}
+	    $this->street = new KLADR_Street();
 	}
 
 	/**
@@ -36,7 +44,7 @@ abstract class KLADR_Core_Address {
 		foreach(get_class_vars(__CLASS__) as $address_item_name => $default_value)
 		{
 			$address_item = $this->$address_item_name;
-			if(is_object($address_item))
+			if(is_object($address_item) AND $address_item instanceof KLADR_Address_Item)
 				$this->code .= sprintf("%-0{$address_item->code_length()}s", $address_item->code);
 		}
 		return $this->code;

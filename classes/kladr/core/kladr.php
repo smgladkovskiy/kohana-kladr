@@ -74,6 +74,11 @@ class KLADR_Core_Kladr {
 		$address_item = $item_name;
 		if(property_exists($this->_address, $address_item))
 		{
+			if($code == '7700000000000')
+			{
+				$this->_address->$address_item->code_length(count($code));
+				$this->_address->$address_item->code_begin(0);
+			}
 			$this->_address->$address_item->code($code);
 			$this->_address->update_code();
 			return TRUE;
@@ -86,6 +91,12 @@ class KLADR_Core_Kladr {
 	{
 		$this->_address->_actual = (bool) $status;
 	    return $this;
+	}
+
+
+	public function address()
+	{
+	    return $this->_address;
 	}
 
 	/**
@@ -125,6 +136,15 @@ class KLADR_Core_Kladr {
 	public function locality()
 	{
 		return $this->_address->locality;
+	}
+
+	/**
+	 * Street getter
+	 * @return KLADR_Street
+	 */
+	public function street()
+	{
+		return $this->_address->street;
 	}
 
 	/**
@@ -187,6 +207,17 @@ class KLADR_Core_Kladr {
 	}
 
 	/**
+	 * Street setting
+	 *
+	 * @param string $code
+	 * @return void
+	 */
+	public function set_street_by_code($code)
+	{
+		$this->_set_street_by_code($code);
+	}
+
+	/**
 	 * Address setting
 	 *
 	 * @param string $code
@@ -245,10 +276,29 @@ class KLADR_Core_Kladr {
 	 */
 	protected function _set_address_by_code($code)
 	{
-		$this->set_address_data('subject', (substr($code, 0, 2)));
-		$this->set_address_data('district', (substr($code, 2, 3)));
-		$this->set_address_data('city', (substr($code, 5, 3)));
-		$this->set_address_data('locality', (substr($code, 8, 3)));
+		if($code == '7700000000000')
+		{
+			$this->set_address_data('subject', (substr($code, 0, 2)));
+			$this->set_address_data('city', $code);
+		}
+		else
+		{
+			$this->set_address_data('subject', (substr($code, 0, 2)));
+			$this->set_address_data('district', (substr($code, 2, 3)));
+			$this->set_address_data('city', (substr($code, 5, 3)));
+			$this->set_address_data('locality', (substr($code, 8, 3)));
+		}
+	}
+
+	/**
+	 * Address object filling
+	 *
+	 * @param string|int $code
+	 * @return void
+	 */
+	protected function _set_street_by_code($code)
+	{
+		$this->_address->street->code($code);
 	}
 
 	/**
