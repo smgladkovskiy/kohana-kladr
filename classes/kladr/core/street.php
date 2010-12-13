@@ -118,4 +118,30 @@ abstract class KLADR_Core_Street {
 
 		return NULL;
 	}
+
+	public function get_by_name($city_code, $name)
+	{
+		$query = DB::select(
+			$this->_config['db_tables']['street'].'.CODE',
+			$this->_config['db_tables']['street'].'.NAME',
+			$this->_config['db_tables']['street'].'.SOCR')
+		->from($this->_config['db_tables']['street'])
+		->where($this->_config['db_tables']['street'].'.NAME', 'LIKE', '%' . $name . '%')
+			->where($this->_config['db_tables']['street'].'.CODE', 'LIKE', substr($city_code, 0, 11).'%%%%00')
+		->limit(1)
+		->as_object()
+		->execute($this->_db);
+
+		if(count($query))
+		{
+			$this->name = $query[0]->NAME . ' ' . $query[0]->SOCR;
+			$this->code = $query[0]->CODE;
+		}
+		else
+		{
+			return NULL;
+		}
+
+		return $this->code;
+	}
 } // End KLADR_Core_Street

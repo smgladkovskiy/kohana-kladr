@@ -142,9 +142,14 @@ class KLADR_Core_Kladr {
 	 * Street getter
 	 * @return KLADR_Street
 	 */
-	public function street()
+	public function street($name = NULL)
 	{
-		return $this->_address->street;
+		if($name === NULL)
+		{
+			return $this->_address->street;
+		}
+
+		$this->_address->street->get_by_name($this->_address->city->code, $name);
 	}
 
 	/**
