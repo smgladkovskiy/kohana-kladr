@@ -188,7 +188,7 @@ class KLADR_Core_Kladr {
 	 * @param int|null $code
 	 * @return KLADR_Address
 	 */
-	public function get_address(int $code = NULL)
+	public function get_address($code = NULL)
 	{
 		if($code !== NULL)
 		{
@@ -198,6 +198,55 @@ class KLADR_Core_Kladr {
 		$address = $this->_get_address($this->_address);
 
 		return $address;
+	}
+
+	public function get_city_by_code($code = NULL)
+	{
+		$city = NULL;
+		if($code !== NULL)
+		{
+			$query = DB::select(
+				array('c.NAME', 'city_name'),
+				array('c.SOCR', 'city_type')
+			)
+			->from(
+				array($this->_config['db_tables']['kladr'], 'c')
+			)
+			->where('c.CODE', 'LIKE',  $code)
+			->limit(1)
+			->as_object()
+			->execute();
+
+			$city = $query[0];
+			$city = $city->city_type . '. ' .  $city->city_name;
+		}
+
+		return $city;
+	}
+
+	public function get_street_by_code($code = NULL)
+	{
+		$street = NULL;
+
+		if($code !== NULL)
+		{
+			$query = DB::select(
+				array('s.NAME', 'street_name'),
+				array('s.SOCR', 'street_type')
+			)
+			->from(
+				array($this->_config['db_tables']['street'], 's')
+			)
+			->where('s.CODE', 'LIKE',  $code)
+			->limit(1)
+			->as_object()
+			->execute();
+
+			$street = $query[0];
+			$street = $street->street_type . '. ' .  $street->street_name;
+		}
+
+		return $street;
 	}
 
 	/**
