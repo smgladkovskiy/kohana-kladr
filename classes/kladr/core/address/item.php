@@ -16,6 +16,7 @@ abstract class KLADR_Core_Address_Item {
 
 	protected $_begin;
 	protected $_length;
+	protected $_address_code;
 
 	protected $_config;
 	protected $_db;
@@ -70,7 +71,36 @@ abstract class KLADR_Core_Address_Item {
 		}
 
 		$this->code = (string) $code;
+
 		return TRUE;
+	}
+
+	public function address_code($code = NULL)
+	{
+		$this->_address_code = (string) $code;
+	}
+
+	public function name()
+	{
+		if($this->_address_code AND $this->code)
+		{
+			$code = $this->_address_code;
+			$code = substr($code, 0, $this->_begin + $this->_length);
+			$code = $code . str_repeat('0', strlen($this->_address_code) - ($this->_begin + $this->_length));
+
+			// status mask set
+			$code = substr_replace($code, '%%', 11, 2);
+
+			$query = DB::select(DB::expr('CONCAT(`NAME`, " ", `SOCR`) AS NAME'), 'CODE')
+				->from($this->_config['db_tables']['kladr'])
+				->where('CODE', 'LIKE', $code)
+				->order_by('NAME', 'ASC')
+				->execute();
+
+			return $query[0]['NAME'];
+		}
+
+	    return NULL;
 	}
 
 	/**

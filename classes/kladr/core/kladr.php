@@ -192,7 +192,7 @@ class KLADR_Core_Kladr {
 	{
 		if($code !== NULL)
 		{
-			$this->_set_address_by_code($code);
+			$this->set_address_by_code($code);
 		}
 
 		$address = $this->_get_address($this->_address);
@@ -252,12 +252,37 @@ class KLADR_Core_Kladr {
 	/**
 	 * Address setting
 	 *
+	 * Код имеет вид:
+	 * 01.234.567.890.12
+	 *  |  |   |   |  |
+	 *  |  |   |   |  |
+	 *  |  |   |   |  признак актуальности
+	 *  |  |   |   код населенного пункта
+	 *  |  |   код города
+	 *  |  код района
+	 *  код субъекта
+	 *
 	 * @param string $code
 	 * @return void
 	 */
 	public function set_address_by_code($code)
 	{
-		$this->_set_address_by_code($code);
+		if($code == '7700000000000')
+		{
+			$this->set_address_data('subject', (substr($code, 0, 2)));
+			$this->set_address_data('city', $code);
+		}
+		else
+		{
+			$this->set_address_data('subject', (substr($code, 0, 2)));
+			$this->set_address_data('district', (substr($code, 2, 3)));
+			$this->set_address_data('city', (substr($code, 5, 3)));
+			$this->set_address_data('locality', (substr($code, 8, 3)));
+		    $this->_address->subject->address_code($code);
+		    $this->_address->district->address_code($code);
+		    $this->_address->city->address_code($code);
+		    $this->_address->locality->address_code($code);
+		}
 	}
 
 	/**
@@ -268,7 +293,7 @@ class KLADR_Core_Kladr {
 	 */
 	public function set_street_by_code($code)
 	{
-		$this->_set_street_by_code($code);
+		$this->_address->street->code($code);
 	}
 
 	/**
@@ -310,49 +335,6 @@ class KLADR_Core_Kladr {
 		}
 
 		throw new Kohana_Exception('there is no such Address property: '. $address_item);
-	}
-
-	/**
-	 * Address object filling
-	 *
-	 * Код имеет вид:
-	 * 01.234.567.890.12
-	 *  |  |   |   |  |
-	 *  |  |   |   |  |
-	 *  |  |   |   |  признак актуальности
-	 *  |  |   |   код населенного пункта
-	 *  |  |   код города
-	 *  |  код района
-	 *  код субъекта
-	 *
-	 * @param string|int $code
-	 * @return void
-	 */
-	protected function _set_address_by_code($code)
-	{
-		if($code == '7700000000000')
-		{
-			$this->set_address_data('subject', (substr($code, 0, 2)));
-			$this->set_address_data('city', $code);
-		}
-		else
-		{
-			$this->set_address_data('subject', (substr($code, 0, 2)));
-			$this->set_address_data('district', (substr($code, 2, 3)));
-			$this->set_address_data('city', (substr($code, 5, 3)));
-			$this->set_address_data('locality', (substr($code, 8, 3)));
-		}
-	}
-
-	/**
-	 * Address object filling
-	 *
-	 * @param string|int $code
-	 * @return void
-	 */
-	protected function _set_street_by_code($code)
-	{
-		$this->_address->street->code($code);
 	}
 
 	/**
@@ -425,7 +407,7 @@ class KLADR_Core_Kladr {
 
 		$address = $result->subject_name  . ' '  . $result->subject_type  . ', '
 		         . $result->district_name . ' '  . $result->district_type . ', '
-		         . $result->city_type     . '. ' . $result->city_name;
+		         . $result->city_name     . '. ' . $result->city_type;
 
 		if($result->locality_name != $result->city_name)
 			$address .= ', ' . $result->locality_type . '. ' . $result->locality_name;

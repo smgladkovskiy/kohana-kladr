@@ -83,7 +83,7 @@ abstract class KLADR_Core_Street {
 		    return $query[0]->NAME . ' ' . $query[0]->SOCR;
 		}
 
-	   throw new Kohana_Exception('there is no information about street code!');
+	   return NULL;
 	}
 
 	/**
