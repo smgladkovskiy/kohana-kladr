@@ -406,11 +406,15 @@ class KLADR_Core_Kladr {
 		$result = $query[0];
 
 		$address = $result->subject_name  . ' '  . $result->subject_type  . ', '
-		         . $result->district_name . ' '  . $result->district_type . ', '
-		         . $result->city_name     . '. ' . $result->city_type;
+		         . $result->district_name . ' '  . $result->district_type . ', ';
+
+		if($result->district_name != $result->city_name)
+		{
+			$address .= $result->city_name     . '. ' . $result->city_type . ', ';
+		}
 
 		if($result->locality_name != $result->city_name)
-			$address .= ', ' . $result->locality_type . '. ' . $result->locality_name;
+			$address .= $result->locality_type . '. ' . $result->locality_name;
 
 		return $address;
 	}
